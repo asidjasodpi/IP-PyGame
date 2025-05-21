@@ -9,18 +9,18 @@ class Level:
         self.all_sprites = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.setup_level()
-        self.player = Player(100, HEIGHT - 150, self.platforms)  # Передаем платформы
+        self.player = Player(100, SCREEN_HEIGHT - 150, self.platforms)  # Передаем платформы
         self.all_sprites.add(self.player)
         self.wave_system = WaveSystem()
         
     def setup_level(self):
         # Создаем платформы
         ground = pygame.sprite.Sprite()
-        ground.image = pygame.Surface((WIDTH, 20))
+        ground.image = pygame.Surface((SCREEN_WIDTH, 20))
         ground.image.fill(WHITE)
         ground.rect = ground.image.get_rect()
         ground.rect.x = 0
-        ground.rect.y = HEIGHT - 20
+        ground.rect.y = SCREEN_HEIGHT - 20
         self.platforms.add(ground)
         self.all_sprites.add(ground)
         
@@ -47,12 +47,20 @@ class Level:
         
         # Отрисовка
         self.screen.fill(BLACK)
+        self.all_sprites.add(*self.wave_system.enemies)
         self.all_sprites.draw(self.screen)
+        
         self.wave_system.enemies.draw(self.screen)
         self.draw_hud()
         
         return game_state
     
     def draw_hud(self):
-        # Здоровье, счёт и волна (как раньше)
-        pass
+        font = pygame.font.SysFont("Arial", 24)
+        health_text = font.render(f"Здоровье: {self.player.health}", True, WHITE)
+        score_text = font.render(f"Счёт: {self.player.score}", True, WHITE)
+        wave_text = font.render(f"Волна: {self.wave_system.wave} из {self.wave_system.max_waves}", True, YELLOW)
+
+        self.screen.blit(health_text, (20, 20))
+        self.screen.blit(score_text, (20, 50))
+        self.screen.blit(wave_text, (20, 80))
