@@ -5,7 +5,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, platforms):
         super().__init__()
         self.image = pygame.Surface((30, 50))
-        self.image.fill(G)
+        self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -31,20 +31,7 @@ class Player(pygame.sprite.Sprite):
             self.is_jumping = True
             self.velocity_y = -self.jump_power
 
-        # # Гравитация
-        # self.velocity_y += 0.8
-        # self.rect.y += self.velocity_y
 
-        # # Проверка приземления на платформы
-        # self.is_jumping = True
-        # for platform in self.platforms:
-        #     if (self.rect.colliderect(platform.rect) and
-        #         self.velocity_y >= 0 and
-        #         self.rect.bottom <= platform.rect.top + 5):
-        #         self.rect.bottom = platform.rect.top
-        #         self.is_jumping = False
-        #         self.velocity_y = 0
-        #         break
 # Гравитация
         self.velocity_y += 0.8
         dy = self.velocity_y
