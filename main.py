@@ -7,7 +7,11 @@ from score_manager import load_score, save_score
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.mixer.init()
+    pygame.mixer.music.load("music/menu.mp3")
+    pygame.mixer.music.play(-1)  # -1 = бесконечно
+
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Платформер")
     clock = pygame.time.Clock()
     
@@ -27,23 +31,36 @@ def main():
                 return
             
         if game_state == "menu":
+            
+            if not pygame.mixer.music.get_busy():
+                pygame.mixer.music.fadeout(2000)
+                pygame.mixer.music.load("music/menu.mp3")
+                pygame.mixer.music.play(-1)  # -1 = бесконечно
             game_state = menu.update()
             if game_state == "game":
+                
+                pygame.mixer.music.stop()
+                if pygame.mixer.music.get_pos() == -1:  # Если музыка не играет
+                    pygame.mixer.music.fadeout(300)
+                    pygame.mixer.music.load("music/level.mp3")
+                    pygame.mixer.music.play(-1)  # -1 = бесконечно
                 level = Level(screen)
         elif game_state == "game":
             game_state = level.update()
         elif game_state == "game_over":
+            pygame.mixer.music.stop()
             # Проверяем, побил ли игрок рекорд
             if level.player.score > high_score:
                 high_score = level.player.score
                 save_score(high_score)
-            menu.show_game_result(level.player.score, high_score)
+            menu.show_game_result(level.player.score, high_score, "Ты проиграл")
             game_state = menu.update()  # Возвращаемся в меню
         elif game_state == "win":
+            pygame.mixer.music.stop()
             if level.player.score > high_score:
                 high_score = level.player.score
                 save_score(high_score)
-            menu.show_game_result(level.player.score, high_score)
+            menu.show_game_result(level.player.score, high_score, "Ты победил")
             game_state = menu.update()
             
         pygame.display.flip()
