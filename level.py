@@ -24,7 +24,7 @@ class Level:
         self.platforms.add(ground)
         self.all_sprites.add(ground)
 
-        # Список платформ: (x, y, width, height, color) !!NAME
+        # Список платформ: (x, y, width, height, NAME
         platform_data = [
             (SCREEN_WIDTH //2 - 250, 200, 500, 33, 'image/platform1_l.jpg'),
 
@@ -59,7 +59,9 @@ class Level:
             if (self.player.rect.colliderect(enemy.rect) and
                 self.player.velocity_y <= 0 and  # Не падает сверху
                 self.player.rect.bottom > enemy.rect.centery):  # Боковое столкновение
-                game_state = self.player.take_damage(10)
+                enemy.bounce(self.player.rect.centerx)
+                game_state = self.player.take_damage(1, enemy.rect.centerx)
+                
         
         # Отрисовка
         self.screen.fill(BACK_BLUE)
