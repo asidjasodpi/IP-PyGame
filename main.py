@@ -42,11 +42,12 @@ def main():
                 pygame.mixer.music.stop()
                 if pygame.mixer.music.get_pos() == -1:  # Если музыка не играет
                     pygame.mixer.music.fadeout(300)
-                    pygame.mixer.music.load("music/level.mp3")
+                    pygame.mixer.music.load("music/level_music.mp3")
                     pygame.mixer.music.play(-1)  # -1 = бесконечно
                 level = Level(screen)
         elif game_state == "game":
             game_state = level.update()
+            
         elif game_state == "game_over":
             pygame.mixer.music.stop()
             # Проверяем, побил ли игрок рекорд
@@ -55,6 +56,7 @@ def main():
                 save_score(high_score)
             menu.show_game_result(level.player.score, high_score, "Ты проиграл")
             game_state = menu.update()  # Возвращаемся в меню
+
         elif game_state == "win":
             pygame.mixer.music.stop()
             if level.player.score > high_score:
