@@ -1,28 +1,45 @@
 import pygame
 from settings import *
-def update(self, enemies):
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y, platforms):
+        super().__init__()
+        self.image = pygame.Surface((40, 40))
+        self.image.fill(FIOL)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = PLAYER_SPEED
+        self.jump_power = PLAYER_JUMP_POWER
+        self.health = PLAYER_HEALTH
+        self.score = 0
+        self.is_jumping = False
+        self.velocity_y = 0
+        self.platforms = platforms  # Теперь игрок знает о платформах
+        
+    def update(self, enemies):
         keys = pygame.key.get_pressed()
- 
+
         # Горизонтальное движение
         if keys[pygame.K_LEFT]:
             self.rect.x -= self.speed
         if keys[pygame.K_RIGHT]:
             self.rect.x += self.speed
- 
+
         # Прыжок
         if keys[pygame.K_SPACE] and not self.is_jumping:
             self.is_jumping = True
             self.velocity_y = -self.jump_power
- 
+
         # Гравитация
         self.velocity_y += 0.8
         dy = self.velocity_y
- 
+
         self.is_jumping = True
         steps = int(abs(dy)) + 1
         for _ in range(steps):
             self.rect.y += dy / steps
- 
+
             # Проверка столкновения с платформами
             for platform in self.platforms:
                 if self.rect.colliderect(platform.rect):
@@ -34,7 +51,7 @@ def update(self, enemies):
                         self.rect.top = platform.rect.bottom
                         self.velocity_y = 0
                     break  # Выходим после столкновения с одной платформой
- 
+
             # Проверка столкновения с врагами (сверху)
             for enemy in enemies:
                 if (self.rect.colliderect(enemy.rect) and
@@ -44,3 +61,10 @@ def update(self, enemies):
                     self.score += 10
                     self.velocity_y = -12  # Отскок после убийства врага
                     break
+
+                
+    def take_damage(self, damage):
+        self.health -= damage
+        if self.health <= 0:
+            return "game_over"
+        return "game"
