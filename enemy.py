@@ -1,44 +1,90 @@
 import pygame
 from settings import *
 
+
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, patrol_range=(0, SCREEN_WIDTH)):
         super().__init__()
         
         self.image = pygame.Surface((30, 30))
-        self.image.fill(RED)
+        self.image.fill(PRETT_RED)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.speed = ENEMY_SPEED
-        self.direction = -1  # Движение влево
+
+        self.direction = 1  # Движение влево
+        self.patrol_start, self.patrol_end = patrol_range
         
     def update(self):
         self.rect.x += self.speed * self.direction
-        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH + 1000:
-            self.kill()  # Удаляем врагов за экраном
+        # Меняем направление, если достиг границы патрулирования
+        if self.rect.left < self.patrol_start or self.rect.right > self.patrol_end:
+            self.direction *= -1
 
 class WaveSystem:
-    def __init__(self):
+    def __init__(self, platforms):
         self.is_waiting = False       # ждём ли начала новой волны
         self.wait_start_time = 0
         self.wave = 0
         self.max_waves = 3
         self.enemies = pygame.sprite.Group()
         self.last_wave_time = 0
+        self.platforms = platforms
+
+        self.stars = pygame.sprite.Group()
+        self.colected_stars = 0
         
+
     def spawn_wave(self):
         
         self.wave += 1
         self.enemies.empty()  # очистка прошлых врагов
-        for i in range(3 + (self.wave) * 2):  # 3, 5, 7 врагов
-            x = SCREEN_WIDTH + i * 60
-            enemy = Enemy(x, SCREEN_HEIGHT - 50)
-            self.enemies.add(enemy)
-        print(f"Спавн волны {self.wave}: {len(self.enemies)} врагов")
+        self.stars.empty()
+        if self.wave == 1:
+            # Один враг на платформе
+            self._spawn_on_platform(7)
+            self._spawn_on_platform(8)
+
+        elif self.wave == 2:
+            # Один на земле, два на платформах
+            self._spawn_on_ground(2)
+            self._spawn_on_platform(4)
+            self._spawn_on_platform(5)
+
+        elif self.wave == 3:
+            # Два на земле, три на платформах
+            self._spawn_on_ground(2)
+            self._spawn_on_platform(4)
+            self._spawn_on_platform(5)
+            self._spawn_on_platform(6)
+            self._spawn_on_platform(7)
+            self._spawn_on_platform(8)
+
+
+
         self.last_wave_time = pygame.time.get_ticks()
         self.is_waiting = False
-            
+
+    def _spawn_on_ground(self, count):
+        position = [
+            100, SCREEN_WIDTH - 100
+        ]
+
+        for pos in position:
+            enemy = Enemy(pos, SCREEN_HEIGHT - 50)
+            self.enemies.add(enemy)
+
+
+    def _spawn_on_platform(self, index,):
+
+        if index < len(self.platforms.sprites()):
+            platform = list(self.platforms)[index]
+            x = platform.rect.x + platform.rect.width // 2
+            y = platform.rect.y - 30
+            enemy = Enemy(x, y, patrol_range=(platform.rect.left, platform.rect.right))
+            self.enemies.add(enemy)
+
     def update(self):
         if self.wave >= self.max_waves and len(self.enemies) == 0:
             return "win"
