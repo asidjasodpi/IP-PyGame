@@ -10,6 +10,7 @@ def main():
     pygame.mixer.init()
     pygame.mixer.music.load("music/menu.mp3")
     pygame.mixer.music.play(-1)  # -1 = бесконечно
+    pygame.mixer.music.set_volume(0.5)
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Платформер")
