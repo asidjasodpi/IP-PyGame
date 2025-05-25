@@ -15,8 +15,25 @@ class Enemy(pygame.sprite.Sprite):
 
         self.direction = 1  # Движение влево
         self.patrol_start, self.patrol_end = patrol_range
-        
+
+        self.stunned = False         # Признак оглушения
+        self.stunned_start_time = 0  # Время начала оглушения
+        self.stun_duration = 500     # Длительность в миллисекундах (0.5 секунды)
+    
+    def bounce(self, player_x):
+        if not self.stunned:
+            if self.rect.centerx < player_x:
+                self.rect.x -= 30
+            else:
+                self.rect.x += 30
+            self.stunned = True
+            self.stunned_start_time = pygame.time.get_ticks()
+
     def update(self):
+        if self.stunned:
+            if pygame.time.get_ticks() - self.stunned_start_time >= self.stun_duration:
+                self.stunned = False
+            return  # ничего не делает, пока оглушён
         self.rect.x += self.speed * self.direction
         # Меняем направление, если достиг границы патрулирования
         if self.rect.left < self.patrol_start or self.rect.right > self.patrol_end:
@@ -84,6 +101,7 @@ class WaveSystem:
             y = platform.rect.y - 30
             enemy = Enemy(x, y, patrol_range=(platform.rect.left, platform.rect.right))
             self.enemies.add(enemy)
+
 
     def update(self):
         if self.wave >= self.max_waves and len(self.enemies) == 0:
