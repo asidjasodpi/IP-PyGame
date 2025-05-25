@@ -1,6 +1,4 @@
-import pygame
-pygame.init()
-pygame.mixer.init()
+
 SCREEN_WIDTH = 1800
 SCREEN_HEIGHT = 980
 FPS = 60
@@ -21,7 +19,7 @@ FIOL = (125, 16, 162)
 # Игрок
 PLAYER_SPEED = 10
 PLAYER_JUMP_POWER = 19
-PLAYER_HEALTH = 1000
+PLAYER_HEALTH = 3
 # Враги
 ENEMY_SPEED = 4
 WAVE_DELAY = 5000  # 5 сек между волнами
