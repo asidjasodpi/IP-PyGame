@@ -1,7 +1,8 @@
 import pygame
 from settings import *
 from player import Player
-from enemy import Enemy, WaveSystem
+from enemy import WaveSystem
+
 
 class Level:
     def __init__(self, screen):
@@ -11,32 +12,47 @@ class Level:
         self.setup_level()
         self.player = Player(100, SCREEN_HEIGHT - 150, self.platforms)  # Передаем платформы
         self.all_sprites.add(self.player)
-        self.wave_system = WaveSystem()
+        self.wave_system = WaveSystem(self.platforms)
+
+        
         
     def setup_level(self):
-        # Создаем платформы
         ground = pygame.sprite.Sprite()
         ground.image = pygame.Surface((SCREEN_WIDTH, 20))
         ground.image.fill(WHITE)
-        ground.rect = ground.image.get_rect()
-        ground.rect.x = 0
-        ground.rect.y = SCREEN_HEIGHT - 20
+        ground.rect = ground.image.get_rect(topleft=(0, SCREEN_HEIGHT - 20))
         self.platforms.add(ground)
         self.all_sprites.add(ground)
-        
-        platform1 = pygame.sprite.Sprite()
-        platform1.image = pygame.Surface((200, 20))
-        platform1.image.fill(WHITE)
-        platform1.rect = platform1.image.get_rect()
-        platform1.rect.x = 300
-        platform1.rect.y = 400
-        self.platforms.add(platform1)
-        self.all_sprites.add(platform1)
+
+        # Список платформ: (x, y, width, height, color) !!NAME
+        platform_data = [
+            (SCREEN_WIDTH //2 - 250, 200, 500, 33, 'image/platform1_l.jpg'),
+
+            (80, 350, 250, 33, 'image/platform2.jpg'),
+            (SCREEN_WIDTH - 330, 350, 250, 33, 'image/platform1.jpg'),
+
+            (450, 480, 198, 33, 'image/platform1.jpg'),
+            (SCREEN_WIDTH - 648, 480, 198, 33, 'image/platform2.jpg'),
+
+            (SCREEN_WIDTH //2 - 250, 660, 500, 33, 'image/platform2_l.jpg'),
+
+            (150, 820, 500, 33, 'image/platform3.jpg'),
+            (SCREEN_WIDTH - 650, 820, 500, 33, 'image/platform4.jpg'),
+
+        ]
+
+        for x, y, w, h, platform_name in platform_data:
+            platform = pygame.sprite.Sprite()
+            platform.image = pygame.transform.scale(pygame.image.load(platform_name), (w, h)) 
+            platform.rect = platform.image.get_rect(topleft=(x, y))
+            self.platforms.add(platform)
+            self.all_sprites.add(platform)
         
     def update(self):
         # Обновляем игрока и врагов
         self.player.update(self.wave_system.enemies)
         game_state = self.wave_system.update()
+        self.wave_system.stars.draw(self.screen)
         
         # Проверка столкновений с врагами (боковой урон)
         for enemy in self.wave_system.enemies:
@@ -46,11 +62,12 @@ class Level:
                 game_state = self.player.take_damage(10)
         
         # Отрисовка
-        self.screen.fill(BLACK)
+        self.screen.fill(BACK_BLUE)
         self.all_sprites.add(*self.wave_system.enemies)
         self.all_sprites.draw(self.screen)
         
         self.wave_system.enemies.draw(self.screen)
+        self.wave_system.stars.draw(self.screen)
         self.draw_hud()
         
         return game_state
@@ -64,3 +81,5 @@ class Level:
         self.screen.blit(health_text, (20, 20))
         self.screen.blit(score_text, (20, 50))
         self.screen.blit(wave_text, (20, 80))
+
+    
