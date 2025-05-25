@@ -16,6 +16,9 @@ class Player(pygame.sprite.Sprite):
         self.is_jumping = False
         self.velocity_y = 0
         self.platforms = platforms  # Теперь игрок знает о платформах
+
+        self.last_hit_time = 0
+        self.invincibility_delay = 500  # в миллисекундах
         
     def update(self, enemies):
         keys = pygame.key.get_pressed()
@@ -58,13 +61,36 @@ class Player(pygame.sprite.Sprite):
                     self.velocity_y >= 0 and
                     self.rect.bottom <= enemy.rect.top + 10):
                     enemy.kill()
+
+                    enemy_dead = pygame.mixer.Sound('music/enemy_dead.ogg')
+                    enemy_dead.play()
+
                     self.score += 10
                     self.velocity_y = -12  # Отскок после убийства врага
                     break
 
                 
-    def take_damage(self, damage):
+    def take_damage(self, damage, enemy_x):
+        now = pygame.time.get_ticks()
+        if now - self.last_hit_time < self.invincibility_delay:
+            return "game"  # временно неуязвим
+
+        self.last_hit_time = now
         self.health -= damage
+
+        player_kick = pygame.mixer.Sound('music/player_kick.ogg')
+        player_kick.play()
+
+        # Отскок: если враг справа — отскочить влево, и наоборот
+        if self.rect.centerx < enemy_x:
+            self.rect.x -= 30
+        else:
+            self.rect.x += 30
+        self.velocity_y = -10  # подпрыгнуть вверх немного
+
+        
         if self.health <= 0:
+            player_dead = pygame.mixer.Sound('music/player_dead.ogg')
+            player_dead.play()
             return "game_over"
         return "game"
